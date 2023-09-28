@@ -11,7 +11,7 @@ class KeyboardMixin:
         markup.row(btn2, btn3)
         return markup
 
-    def markup_type_car_for_dev_in_cab():
+    def markup_type_car():
         markup_type_car = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton('Головной', callback_data='head_car_for_devices')
         btn2 = types.InlineKeyboardButton('Моторный', callback_data='motor_car_for_devices')
@@ -34,16 +34,19 @@ class KeyboardMixin:
         btn4 = types.InlineKeyboardButton('шкаф №4', callback_data='head_cab_4')
         btn5 = types.InlineKeyboardButton('шкаф №5', callback_data='head_cab_5')
         btnm = types.InlineKeyboardButton('кабина, за машинистом', callback_data='head_cab_m')
-        fuses.add(btn1, btn2, btn4, btn5, btnm)
+        fuses.add(btn1, btn2)
+        fuses.add(btn4, btn5)
+        fuses.add(btnm)
         return fuses
 
     def markup_cab_in_motor():
         fuses = types.InlineKeyboardMarkup()
-        btn1 = types.InlineKeyboardButton('шкаф №1', callback_data='motor_cab_1')
-        btn2 = types.InlineKeyboardButton('шкаф №2', callback_data='motor_cab_2')
-        btn4 = types.InlineKeyboardButton('шкаф №4', callback_data='motor_cab_4')
+        btn1 = types.InlineKeyboardButton('шкаф №1 (ДВК)', callback_data='motor_cab_1')
+        btn2 = types.InlineKeyboardButton('шкаф №2 (РУМ)', callback_data='motor_cab_2')
+        btn4 = types.InlineKeyboardButton('шкаф №4 (АВ)', callback_data='motor_cab_4')
         btn5 = types.InlineKeyboardButton('шкаф №5', callback_data='motor_cab_5')
-        fuses.add(btn1, btn2, btn4, btn5)
+        fuses.row(btn1, btn2)
+        fuses.row(btn4, btn5)
         return fuses
 
     def markup_cab_in_trailer():
