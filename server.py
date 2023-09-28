@@ -1,8 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-import time
-
 from database.models import Wires, engine
 from logger import logger
 from main import bot
@@ -56,6 +54,7 @@ class Worker:
                 tablet.location.in_(
                     [cabinet])).filter(
                         tablet.name.like('ПР-%'))
+        bot.send_message(message.chat.id, '----------------------------')
         for fuses in session.scalars(stmt):
             result = []
             result.append(f'{fuses.name}: {fuses.description.lower()}\n')
