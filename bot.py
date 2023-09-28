@@ -1,10 +1,8 @@
 from database.models import HeadCarDEvices, MotorCarDEvices, TrailerCarDEvices
-
 from keyboard_mixin import KeyboardMixin as kb
-from server import Worker as w
-from main import bot
-
 from logger import logger
+from main import bot
+from server import Worker as w
 
 TCFU = {}
 

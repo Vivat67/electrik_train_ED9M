@@ -1,7 +1,5 @@
+from models import Wires, engine
 from sqlalchemy.orm import Session
-from models import engine
-
-from models import Wires
 
 with Session(engine) as session:
     wire1 = Wires(

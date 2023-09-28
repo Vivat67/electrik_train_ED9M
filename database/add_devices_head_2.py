@@ -1,7 +1,5 @@
+from models import HeadCarDEvices, engine
 from sqlalchemy.orm import Session
-from models import engine
-
-from models import HeadCarDEvices
 
 with Session(engine) as session:
     dev1 = HeadCarDEvices(

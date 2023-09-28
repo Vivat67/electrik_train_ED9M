@@ -1,7 +1,5 @@
+from models import TrailerCarDEvices, engine
 from sqlalchemy.orm import Session
-from models import engine
-
-from models import TrailerCarDEvices
 
 with Session(engine) as session:
     dev1 = TrailerCarDEvices(

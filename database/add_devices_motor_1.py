@@ -1,7 +1,5 @@
+from models import MotorCarDEvices, engine
 from sqlalchemy.orm import Session
-from models import engine
-
-from models import MotorCarDEvices
 
 with Session(engine) as session:
     klp_o = MotorCarDEvices(

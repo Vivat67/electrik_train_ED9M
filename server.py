@@ -1,12 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from database.models import engine
 
-from database.models import Wires
-
-from main import bot
-
+from database.models import Wires, engine
 from logger import logger
+from main import bot
 
 
 class Worker:
