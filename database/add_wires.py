@@ -1,3 +1,6 @@
+"""
+Добавление данных в БД
+"""
 from models import Wires, engine
 from sqlalchemy.orm import Session
 

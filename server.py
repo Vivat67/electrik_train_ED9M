@@ -1,3 +1,8 @@
+"""
+В данном модуле содиржится логика обработки данных полученных от польтзователя
+телеграмм сообщества, осуществляется взаимосвязь с БД и отправка данных
+обратно пользователю.
+"""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -7,10 +12,18 @@ from main import bot
 
 
 class Worker:
+    """"
+    Класс осуществляет взаимосвязь с БД и отпраку информации пользователю.
+    """
 
     # TCFU = {}
     @logger.catch
-    def wires(message):
+    def wires(message) -> None:
+        """
+        Обрабатывает запрос от пользователя,
+        связывается с БД (табличка 'Провода'),
+        отпровляет данные с БД (описание провода).
+        """
         wire_number = message.text
         session = Session(engine)
         stmt = select(Wires).where(Wires.name.in_([wire_number]))
@@ -23,7 +36,12 @@ class Worker:
                              'В базе есть провода с 1-71.')
 
     @logger.catch
-    def devices_in_cabinets(message):
+    def devices_in_cabinets(message) -> None:
+        """
+        Обрабатывает запрос от пользователя,
+        связывается с БД (таблички данного типа вагона),
+        отпровляет данные с БД (описание конкретного аппарата).
+        """
         from bot import TCFU
         user = TCFU[message.chat.id]
         deviсes = message.text.upper()
@@ -44,7 +62,12 @@ class Worker:
                 'Пример: Тр-7, ПР-10, КЛП-О, АВУ')
 
     @logger.catch
-    def fuses_in_cabinets(message):
+    def fuses_in_cabinets(message) -> None:
+        """
+        Обрабатывает запрос от пользователя,
+        связывается с БД (табличка данного типа вагона),
+        отпровляет данные с БД (все предохранители в шкафу).
+        """
         from bot import TCFU
         tablet = TCFU[message.chat.id][0]
         cabinet = TCFU[message.chat.id][1]

@@ -1,3 +1,6 @@
+"""
+Добавление данных в БД
+"""
 from models import HeadCarDEvices, engine
 from sqlalchemy.orm import Session
 

@@ -1,15 +1,24 @@
+"""
+Модуль принамает запросы от пользователя.
+"""
 from database.models import HeadCarDEvices, MotorCarDEvices, TrailerCarDEvices
 from keyboard_mixin import KeyboardMixin as kb
 from logger import logger
 from main import bot
 from server import Worker as w
 
+# Словарь для хранения временной информации от пользователя.
 TCFU = {}
 
 
 @logger.catch
 @bot.message_handler(commands=['start', 'help'])
-def start(message):
+def start(message) -> None:
+    """
+    Функция принимает от пользователя каманды: start и help,
+    Выводит подсказку по использованию бота.
+    Отправляет стартовую клаввиатуру.
+    """
     bot.send_message(
         message.chat.id,
         'Вам доступны следующие кнопки:\n'
@@ -32,7 +41,11 @@ def start(message):
 
 @logger.catch
 @bot.message_handler()
-def get_data_from_basic_keyboard(message):
+def get_data_from_basic_keyboard(message) -> None:
+    """
+    Принимает данные из стртовой клавиатуры.
+    Осуществляет связь со следующими функциями и клавиатурами.
+    """
     if message.text == 'Провода':
         bot.send_message(message.chat.id, 'Введите номер провода')
         bot.register_next_step_handler(message, w.wires)
@@ -52,7 +65,11 @@ def get_data_from_basic_keyboard(message):
 
 @logger.catch
 @bot.callback_query_handler(func=lambda _: True)
-def all_query(call):
+def all_query(call) -> None:
+    """
+    Принимает данные со всех инлайн кнопок,
+    осуществляет связь со следующими функциями и клавиатурами.
+    """
     if call.data == 'motor_car_for_devices':
         get_calldata_type_car(call.message, MotorCarDEvices)
     elif call.data == 'head_car_for_devices':
@@ -103,7 +120,23 @@ def all_query(call):
 
 
 @logger.catch
-def get_calldata_fuses(message, car, cabinet):
+def get_calldata_fuses(
+    message,
+    car: HeadCarDEvices | MotorCarDEvices | TrailerCarDEvices,
+    cabinet: str
+                      ) -> None:
+    """
+    Вспомогательная функция.
+
+    Заносит данные от пользователя в словарь, что бы использовать их
+    в функции fuses_in_cabinets().
+
+    Args:
+        message: данные от телеграмм
+        car: class, характеризует тип вагона,
+             используется для взаимодействия с БД.
+        cabinet: обозначает поле location в БД.
+    """
     TCFU[message.chat.id] = []
     TCFU[message.chat.id].append(car)
     TCFU[message.chat.id].append(cabinet)
@@ -111,7 +144,18 @@ def get_calldata_fuses(message, car, cabinet):
 
 
 @logger.catch
-def get_calldata_type_car(message, car):
+def get_calldata_type_car(message, car: str) -> None:
+    """
+    Вспомогательная функция.
+
+    Заносит данные от пользователя в словарь, что бы использовать их
+    в функции devices_in_cabinets().
+
+    Args:
+        message: данные от телеграмм
+        car: class, характеризует тип вагона,
+             используется для взаимодействия с БД.
+    """
     TCFU[message.chat.id] = car
     bot.send_message(message.chat.id, 'Введите название аппарата')
     bot.register_next_step_handler(message, w.devices_in_cabinets)

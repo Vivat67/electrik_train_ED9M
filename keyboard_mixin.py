@@ -1,11 +1,20 @@
+"""
+В этом модуле собраны все клавиатуры используемые в боте.
+"""
 from telebot import types
 
 from logger import logger
 
 
 class KeyboardMixin:
+    """
+    Класе хранит клавиатуры.
+    """
     @logger.catch
-    def main_markup():
+    def main_markup() -> object:
+        """
+        Стартовая клавиатура.
+        """
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton('Все предохранители в шкафу')
         btn2 = types.KeyboardButton('Аппараты в шкафах')
@@ -15,7 +24,11 @@ class KeyboardMixin:
         return markup
 
     @logger.catch
-    def markup_type_car():
+    def markup_type_car() -> object:
+        """
+        Выбор типа вагона.
+        Используется для функции вывода конкретного аппарата в шкафу.
+        """
         markup_type_car = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
             'Головной', callback_data='head_car_for_devices')
@@ -27,7 +40,11 @@ class KeyboardMixin:
         return markup_type_car
 
     @logger.catch
-    def markup_fuses():
+    def markup_fuses() -> object:
+        """
+        Выбор типа вагона.
+        Используется для функции вывода всех предохранителей в шкафу.
+        """
         fuses = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
             'Головной', callback_data='head_fuses')
@@ -39,7 +56,10 @@ class KeyboardMixin:
         return fuses
 
     @logger.catch
-    def markup_cab_in_head():
+    def markup_cab_in_head() -> object:
+        """
+        Определение номера шкафа для головного вагона.
+        """
         fuses = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
             'шкаф №1', callback_data='head_cab_1')
@@ -57,7 +77,10 @@ class KeyboardMixin:
         return fuses
 
     @logger.catch
-    def markup_cab_in_motor():
+    def markup_cab_in_motor() -> object:
+        """
+        Определение номера шкафа для моторного вагона.
+        """
         fuses = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
             'шкаф №1 (ДВК)', callback_data='motor_cab_1')
@@ -72,7 +95,10 @@ class KeyboardMixin:
         return fuses
 
     @logger.catch
-    def markup_cab_in_trailer():
+    def markup_cab_in_trailer() -> object:
+        """
+        Определение номера шкафа для прицепного вагона.
+        """
         fuses = types.InlineKeyboardMarkup()
         btn3 = types.InlineKeyboardButton(
             'шкаф №3', callback_data='trailer_cab_3')
