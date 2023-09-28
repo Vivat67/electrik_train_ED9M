@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+import time
+
 from database.models import Wires, engine
 from logger import logger
 from main import bot
@@ -14,21 +16,34 @@ class Worker:
         wire_number = message.text
         session = Session(engine)
         stmt = select(Wires).where(Wires.name.in_([wire_number]))
-        wire = session.scalar(stmt).description
-        bot.send_message(message.chat.id, wire)
+        try:
+            wire = session.scalar(stmt).description
+            bot.send_message(message.chat.id, wire)
+        except Exception:
+            bot.send_message(message.chat.id,
+                             'Такого провода нет.\n'
+                             'В базе есть провода с 1-71.')
 
     @logger.catch
     def devices_in_cabinets(message):
         from bot import TCFU
         user = TCFU[message.chat.id]
-        devises = message.text.upper()
+        deviсes = message.text.upper()
         session = Session(engine)
         stmt = select(
-            user).where(user.name.in_([devises]))
-        devises = session.scalar(stmt)
-        bot.send_message(
-            message.chat.id,
-            f'Находится: {devises.location}\n{devises.description}')
+            user).where(user.name.in_([deviсes]))
+        try:
+            deviсes = session.scalar(stmt)
+            bot.send_message(
+                message.chat.id,
+                f'Находится: {deviсes.location}\n{deviсes.description}')
+        except Exception:
+            bot.send_message(
+                message.chat.id,
+                'Такого аппарата в данном вагоне нет.\n'
+                'Или проверьте правильность написания.\n'
+                'Пишите название через тире.\n'
+                'Пример: Тр-7, ПР-10, КЛП-О, АВУ')
 
     @logger.catch
     def fuses_in_cabinets(message):

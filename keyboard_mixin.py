@@ -4,6 +4,7 @@ from logger import logger
 
 
 class KeyboardMixin:
+    @logger.catch
     def main_markup():
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton('Все предохранители в шкафу')
