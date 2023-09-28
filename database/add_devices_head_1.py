@@ -156,6 +156,8 @@ with Session(engine) as session:
     #                  dev25, dev26, dev27, dev28, dev29
     #                  ])
     # session.commit()
+
+#Здесь и везде далее вспомогательный блок для проверки добавленных данных.
 from sqlalchemy import select
 
 session = Session(engine)
