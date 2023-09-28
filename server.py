@@ -6,11 +6,13 @@ from database.models import Wires
 
 from main import bot
 
+from logger import logger
+
 
 class Worker:
 
     # TCFU = {}
-
+    @logger.catch
     def wires(message):
         wire_number = message.text
         session = Session(engine)
@@ -18,6 +20,7 @@ class Worker:
         wire = session.scalar(stmt).description
         bot.send_message(message.chat.id, wire)
 
+    @logger.catch
     def devices_in_cabinets(message):
         from bot import TCFU
         user = TCFU[message.chat.id]
@@ -30,6 +33,7 @@ class Worker:
             message.chat.id,
             f'Находится: {devises.location}\n{devises.description}')
 
+    @logger.catch
     def fuses_in_cabinets(message):
         from bot import TCFU
         tablet = TCFU[message.chat.id][0]
@@ -50,3 +54,9 @@ class Worker:
     #     Worker.TCFU[message.chat.id].append(car)
     #     Worker.TCFU[message.chat.id].append(cabinet)
     #     fuses_in_cabinets(message)
+
+    # def get_calldata_type_car(message, car):
+    #     from bot import TCFU
+    #     TCFU[message.chat.id] = car
+    #     bot.send_message(message.chat.id, 'Введите название аппарата')
+    #     bot.register_next_step_handler(message, devices_in_cabinets)

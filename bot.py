@@ -4,9 +4,12 @@ from keyboard_mixin import KeyboardMixin as kb
 from server import Worker as w
 from main import bot
 
+from logger import logger
+
 TCFU = {}
 
 
+@logger.catch
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
     bot.send_message(
@@ -29,6 +32,7 @@ def start(message):
         )
 
 
+@logger.catch
 @bot.message_handler()
 def get_data_from_basic_keyboard(message):
     if message.text == 'Провода':
@@ -48,6 +52,7 @@ def get_data_from_basic_keyboard(message):
             )
 
 
+@logger.catch
 @bot.callback_query_handler(func=lambda _: True)
 def all_query(call):
     if call.data == 'motor_car_for_devices':
@@ -99,6 +104,7 @@ def all_query(call):
         get_calldata_fuses(call.message, TrailerCarDEvices, 'шкаф №4')
 
 
+@logger.catch
 def get_calldata_fuses(message, car, cabinet):
     TCFU[message.chat.id] = []
     TCFU[message.chat.id].append(car)
@@ -106,6 +112,7 @@ def get_calldata_fuses(message, car, cabinet):
     w.fuses_in_cabinets(message)
 
 
+@logger.catch
 def get_calldata_type_car(message, car):
     TCFU[message.chat.id] = car
     bot.send_message(message.chat.id, 'Введите название аппарата')
