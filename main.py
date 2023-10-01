@@ -1,22 +1,10 @@
 """
-Модуль осуществляет запуск и перезапуск бота в случае ошибки.
+Модуль осуществляет запуск бота.
 """
-import os
-
-import telebot
-from dotenv import load_dotenv
-
-# Загружаем данные с .env файла
-load_dotenv()
-token = os.getenv("ACCESS_TOKEN")
-
-bot = telebot.TeleBot(token)
 
 if __name__ == '__main__':
-    from bot import bot
+    from bot import Bot
     print('Я запущен!')
-    while True:
-        try:
-            bot.infinity_polling()
-        except Exception:
-            pass
+    my_bot = Bot()
+    my_bot.start()
+    my_bot.run()
