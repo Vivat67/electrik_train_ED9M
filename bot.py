@@ -17,6 +17,9 @@ from logger import logger
 
 
 class Bot():
+    """
+    Основное взаимодействие с ботом.
+    """
 
     def __init__(self):
         load_dotenv()
