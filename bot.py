@@ -3,17 +3,17 @@
 осуществляется взаимосвязь с БД и отправляет данные
 обратно пользователю.
 """
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from database.models import Wires, engine
-from database.models import HeadCarDEvices, MotorCarDEvices, TrailerCarDEvices
-from keyboard_mixin import KeyboardMixin as kb
-from logger import logger
 import os
 
 import telebot
 from dotenv import load_dotenv
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from database.models import (HeadCarDEvices, MotorCarDEvices,
+                             TrailerCarDEvices, Wires, engine)
+from keyboard_mixin import KeyboardMixin as kb
+from logger import logger
 
 
 class Bot():
