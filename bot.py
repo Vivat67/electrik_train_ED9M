@@ -9,14 +9,15 @@ import telebot
 from dotenv import load_dotenv
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from telebot import apihelper
 
-from database.models import (HeadCarDEvices, MotorCarDEvices,
-                             TrailerCarDEvices, Wires, engine)
-from keyboard_mixin import KeyboardMixin as kb
+from database.models import (HeadCarDevices, MotorCarDevices,
+                             TrailerCarDevices, Wires, engine)
+from keyboard_mixin import KeyboardMixin
 from logger import logger
 
 
-class Bot():
+class Bot:
     """
     Основное взаимодействие с ботом.
     """
@@ -25,10 +26,12 @@ class Bot():
         load_dotenv()
         self.bot = self.do_auth()
         # Словарь для хранения временных данных от пользователя
-        self.TCFU = {}
+        self.temp_data = {}
+        # kb- keyboard
+        self.kb = KeyboardMixin()
 
     @logger.catch
-    def do_auth(self) -> None:
+    def do_auth(self) -> None | telebot.TeleBot:
         """
         Авторизация сообщества. Использует переменную,
         хранящуюся в файле настроек окружения .env,
@@ -38,10 +41,14 @@ class Bot():
         try:
             self.bot = telebot.TeleBot(token)
             return self.bot
-        except Exception as error:
-            print(error)
+        except apihelper.ApiTelegramException as e:
+            print(f"Произошла ошибка авторизации: {e}")
 
     def start(self):
+        """
+        Осуществляет запуск кода, для взаимодействия с telegram API,
+        внутри обьекта bot.
+        """
         @logger.catch
         @self.bot.message_handler(commands=['start', 'help'])
         def handle_start(message) -> None:
@@ -66,7 +73,7 @@ class Bot():
                 '2. Провода:\n'
                 '  1. введите номер провода;\n'
                 '  2. получаете описание данного провода.\n',
-                reply_markup=kb.main_markup()
+                reply_markup=self.kb.main_markup()
                 )
 
         @logger.catch
@@ -83,91 +90,133 @@ class Bot():
                 self.bot.send_message(
                     message.chat.id,
                     'Выберите тип вагона',
-                    reply_markup=kb.markup_type_car()
+                    reply_markup=self.kb.markup_type_car()
                     )
             elif message.text == 'Все предохранители в шкафу':
                 self.bot.send_message(
                     message.chat.id,
                     'Выберите тип вагона',
-                    reply_markup=kb.markup_fuses()
+                    reply_markup=self.kb.markup_fuses()
                     )
 
         @logger.catch
-        @self.bot.callback_query_handler(func=lambda _: True)
-        def all_query_handle(call) -> None:
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith('devices'))
+        def dev_type_car_query_handle(call) -> None:
             """
-            Принимает данные со всех инлайн кнопок,
-            осуществляет связь со следующими функциями и клавиатурами.
+            Принимает данные от инлайн кнопок,
+            отвечающих за выбор типа вагона,
+            при поиске аппарата в шкафу.
             """
-            if call.data == 'motor_car_for_devices':
+            if call.data == 'devices_motor_car':
                 self.get_calldata_type_car(call.message,
-                                           MotorCarDEvices)
-            elif call.data == 'head_car_for_devices':
+                                           MotorCarDevices)
+            elif call.data == 'devices_head_car':
                 self.get_calldata_type_car(call.message,
-                                           HeadCarDEvices)
-            elif call.data == 'trailer_car_for_devices':
+                                           HeadCarDevices)
+            elif call.data == 'devices_trailer_car':
                 self.get_calldata_type_car(call.message,
-                                           TrailerCarDEvices)
-            elif call.data == 'motor_fuses':
+                                           TrailerCarDevices)
+
+        @logger.catch
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith('fuses'))
+        def fuses_type_car_query_handle(call) -> None:
+            """
+            Принимает данные от инлайн кнопок,
+            отвечающих за выбор типа вагона,
+            при поиске всех предохранителей в шкафу.
+            """
+            if call.data == 'fuses_motor':
                 self.bot.send_message(call.message.chat.id,
                                       'Выберите шкаф',
-                                      reply_markup=kb.markup_cab_in_motor()
+                                      reply_markup=self.kb.markup_cab_in_motor()
                                       )
-            elif call.data == 'head_fuses':
+            elif call.data == 'fuses_head':
                 self.bot.send_message(
                     call.message.chat.id,
                     'Выберите шкаф',
-                    reply_markup=kb.markup_cab_in_head()
+                    reply_markup=self.kb.markup_cab_in_head()
                     )
-            elif call.data == 'trailer_fuses':
+            elif call.data == 'fuses_trailer':
                 self.bot.send_message(
                     call.message.chat.id,
                     'Выберите шкаф',
-                    reply_markup=kb.markup_cab_in_trailer()
+                    reply_markup=self.kb.markup_cab_in_trailer()
                     )
-            elif call.data == 'head_cab_1':
+
+        @logger.catch
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith('head'))
+        def fuses_head_query_handle(call) -> None:
+            """
+            Принимает данные от инлайн кнопок,
+            отвечающих за выбор шкафа в головном вагоне,
+            для вывода всех предохранителей в шкафу.
+            """
+            if call.data == 'head_cab_1':
                 self.get_calldata_fuses(call.message,
-                                        HeadCarDEvices,
+                                        HeadCarDevices,
                                         'шкаф №1')
             elif call.data == 'head_cab_2':
                 self.get_calldata_fuses(call.message,
-                                        HeadCarDEvices,
+                                        HeadCarDevices,
                                         'шкаф №2')
             elif call.data == 'head_cab_4':
                 self.get_calldata_fuses(call.message,
-                                        HeadCarDEvices,
+                                        HeadCarDevices,
                                         'шкаф №4')
             elif call.data == 'head_cab_5':
                 self.get_calldata_fuses(call.message,
-                                        HeadCarDEvices,
+                                        HeadCarDevices,
                                         'шкаф №5')
             elif call.data == 'head_cab_m':
                 self.get_calldata_fuses(call.message,
-                                        HeadCarDEvices,
+                                        HeadCarDevices,
                                         'кабина, за машинистом')
-            elif call.data == 'motor_cab_1':
+
+        @logger.catch
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith('motor'))
+        def fuses_motor_query_handle(call) -> None:
+            """
+            Принимает данные от инлайн кнопок,
+            отвечающих за выбор шкафа в моторном вагоне,
+            для вывода всех предохранителей в шкафу.
+            """
+            if call.data == 'motor_cab_1':
                 self.get_calldata_fuses(call.message,
-                                        MotorCarDEvices,
+                                        MotorCarDevices,
                                         'шкаф №1 (ДВК)')
             elif call.data == 'motor_cab_2':
                 self.get_calldata_fuses(call.message,
-                                        MotorCarDEvices,
+                                        MotorCarDevices,
                                         'шкаф №2 (РУМ)')
             elif call.data == 'motor_cab_4':
                 self.get_calldata_fuses(call.message,
-                                        MotorCarDEvices,
+                                        MotorCarDevices,
                                         'шкаф №4 (АВ)')
             elif call.data == 'motor_cab_5':
                 self.get_calldata_fuses(call.message,
-                                        MotorCarDEvices,
+                                        MotorCarDevices,
                                         'шкаф №5')
-            elif call.data == 'trailer_cab_3':
+
+        @logger.catch
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith('trailer'))
+        def fuses_trailer_query_handle(call) -> None:
+            """
+            Принимает данные от инлайн кнопок,
+            отвечающих за выбор шкафа в прицепном вагоне,
+            для вывода всех предохранителей в шкафу.
+            """
+            if call.data == 'trailer_cab_3':
                 self.get_calldata_fuses(call.message,
-                                        TrailerCarDEvices,
+                                        TrailerCarDevices,
                                         'шкаф №3')
             elif call.data == 'trailer_cab_4':
                 self.get_calldata_fuses(call.message,
-                                        TrailerCarDEvices,
+                                        TrailerCarDevices,
                                         'шкаф №4')
 
     @logger.catch
@@ -179,11 +228,11 @@ class Bot():
         """
         wire_number = message.text
         session = Session(engine)
-        stmt = select(Wires).where(Wires.name.in_([wire_number]))
+        staitment = select(Wires).where(Wires.name.in_([wire_number]))
         try:
-            wire = session.scalar(stmt).description
+            wire = session.scalar(staitment).description
             self.bot.send_message(message.chat.id, wire)
-        except Exception:
+        except AttributeError:
             self.bot.send_message(message.chat.id,
                                   'Такого провода нет.\n'
                                   'В базе есть провода с 1-71.')
@@ -195,18 +244,17 @@ class Bot():
         связывается с БД (таблички данного типа вагона),
         отпровляет данные с БД (описание конкретного аппарата).
         """
-        # from bot import TCFU
-        user = self.TCFU[message.chat.id]
+        user = self.temp_data[message.chat.id]
         deviсes = message.text.upper()
         session = Session(engine)
-        stmt = select(
+        staitment = select(
             user).where(user.name.in_([deviсes]))
         try:
-            deviсes = session.scalar(stmt)
+            deviсes = session.scalar(staitment)
             self.bot.send_message(
                 message.chat.id,
                 f'Находится: {deviсes.location}\n{deviсes.description}')
-        except Exception:
+        except AttributeError:
             self.bot.send_message(
                 message.chat.id,
                 'Такого аппарата в данном вагоне нет.\n'
@@ -221,28 +269,27 @@ class Bot():
         связывается с БД (табличка данного типа вагона),
         отпровляет данные с БД (все предохранители в шкафу).
         """
-        # from bot import TCFU
-        tablet = self.TCFU[message.chat.id][0]
-        cabinet = self.TCFU[message.chat.id][1]
+        tablet = self.temp_data[message.chat.id][0]
+        cabinet = self.temp_data[message.chat.id][1]
         session = Session(engine)
-        stmt = select(
+        staitment = select(
             tablet).where(
                 tablet.location.in_(
                     [cabinet])).filter(
                         tablet.name.like('ПР-%'))
         self.bot.send_message(message.chat.id, '----------------------------')
-        for fuses in session.scalars(stmt):
+        for fuses in session.scalars(staitment):
             result = []
             result.append(f'{fuses.name}: {fuses.description.lower()}\n')
             self.bot.send_message(message.chat.id, result)
 
     @logger.catch
     def get_calldata_fuses(
-        self,
-        message,
-        car,
-        cabinet: str
-                        ) -> None:
+            self,
+            message,
+            car,
+            cabinet: str
+    ) -> None:
         """
         Вспомогательная функция.
 
@@ -255,9 +302,9 @@ class Bot():
                 используется для взаимодействия с БД.
             cabinet: обозначает поле location в БД.
         """
-        self.TCFU[message.chat.id] = []
-        self.TCFU[message.chat.id].append(car)
-        self.TCFU[message.chat.id].append(cabinet)
+        self.temp_data[message.chat.id] = []
+        self.temp_data[message.chat.id].append(car)
+        self.temp_data[message.chat.id].append(cabinet)
         self.fuses_in_cabinets(message)
 
     @logger.catch
@@ -273,7 +320,7 @@ class Bot():
             car: class, характеризует тип вагона,
                 используется для взаимодействия с БД.
         """
-        self.TCFU[message.chat.id] = car
+        self.temp_data[message.chat.id] = car
         self.bot.send_message(message.chat.id, 'Введите название аппарата')
         self.bot.register_next_step_handler(message, self.devices_in_cabinets)
 
@@ -285,5 +332,5 @@ class Bot():
         while True:
             try:
                 self.bot.infinity_polling()
-            except Exception:
+            except:
                 pass

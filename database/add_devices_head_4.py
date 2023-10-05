@@ -110,7 +110,7 @@ from sqlalchemy import select
 
 session = Session(engine)
 
-stmt = select(HeadCarDEvices).where(HeadCarDEvices.name.in_(["ПР-70"]))
+staitment = select(HeadCarDEvices).where(HeadCarDEvices.name.in_(["ПР-70"]))
 
-for device in session.scalars(stmt):
+for device in session.scalars(staitment):
     print(device.description)

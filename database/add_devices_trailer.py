@@ -106,11 +106,11 @@ from sqlalchemy import select, update
 
 session = Session(engine)
 
-stmt = update(TrailerCarDEvices).where(
+staitment = update(TrailerCarDEvices).where(
     TrailerCarDEvices.name.in_(['Пр-46'])).values(
         name='ПР-46', location='шкаф №4')
-session.execute(stmt)
+session.execute(staitment)
 session.commit()
 stmt = select(TrailerCarDEvices).where(TrailerCarDEvices.name.in_(['ПР-46']))
-for device in session.scalars(stmt):
+for device in session.scalars(staitment):
     print(device)

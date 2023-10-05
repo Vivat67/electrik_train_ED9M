@@ -93,7 +93,7 @@ from sqlalchemy import select
 
 session = Session(engine)
 
-stmt = select(MotorCarDEvices).where(MotorCarDEvices.name.in_(["ПР-17"]))
+staitment = select(MotorCarDEvices).where(MotorCarDEvices.name.in_(["ПР-17"]))
 
-adt = session.scalar(stmt).description
+adt = session.scalar(staitment).description
 print(adt)

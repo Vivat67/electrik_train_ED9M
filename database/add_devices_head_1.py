@@ -163,10 +163,10 @@ from sqlalchemy import select
 
 session = Session(engine)
 
-stmt = select(HeadCarDEvices).where(HeadCarDEvices.name.in_(["ПР-55"]))
+staitment = select(HeadCarDEvices).where(HeadCarDEvices.name.in_(["ПР-55"]))
 
-res = session.scalar(stmt).description
+res = session.scalar(staitment).description
 print(res)
 
-for device in session.scalars(stmt):
+for device in session.scalars(staitment):
     print(device.description)

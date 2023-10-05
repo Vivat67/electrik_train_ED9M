@@ -8,10 +8,10 @@ from logger import logger
 
 class KeyboardMixin:
     """
-    Класе хранит клавиатуры.
+    Класc хранит клавиатуры.
     """
     @logger.catch
-    def main_markup() -> object:
+    def main_markup(self):
         """
         Стартовая клавиатура.
         """
@@ -24,39 +24,39 @@ class KeyboardMixin:
         return markup
 
     @logger.catch
-    def markup_type_car() -> object:
+    def markup_type_car(self):
         """
         Выбор типа вагона.
         Используется для функции вывода конкретного аппарата в шкафу.
         """
         markup_type_car = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
-            'Головной', callback_data='head_car_for_devices')
+            'Головной', callback_data='devices_head_car')
         btn2 = types.InlineKeyboardButton(
-            'Моторный', callback_data='motor_car_for_devices')
+            'Моторный', callback_data='devices_motor_car')
         btn3 = types.InlineKeyboardButton(
-            'Прицепной', callback_data='trailer_car_for_devices')
+            'Прицепной', callback_data='devices_trailer_car')
         markup_type_car.add(btn1, btn2, btn3)
         return markup_type_car
 
     @logger.catch
-    def markup_fuses() -> object:
+    def markup_fuses(self):
         """
         Выбор типа вагона.
         Используется для функции вывода всех предохранителей в шкафу.
         """
         fuses = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
-            'Головной', callback_data='head_fuses')
+            'Головной', callback_data='fuses_head')
         btn2 = types.InlineKeyboardButton(
-            'Моторный', callback_data='motor_fuses')
+            'Моторный', callback_data='fuses_motor')
         btn3 = types.InlineKeyboardButton(
-            'Прицепной', callback_data='trailer_fuses')
+            'Прицепной', callback_data='fuses_trailer')
         fuses.add(btn1, btn2, btn3)
         return fuses
 
     @logger.catch
-    def markup_cab_in_head() -> object:
+    def markup_cab_in_head(self):
         """
         Определение номера шкафа для головного вагона.
         """
@@ -77,7 +77,7 @@ class KeyboardMixin:
         return fuses
 
     @logger.catch
-    def markup_cab_in_motor() -> object:
+    def markup_cab_in_motor(self):
         """
         Определение номера шкафа для моторного вагона.
         """
@@ -95,14 +95,14 @@ class KeyboardMixin:
         return fuses
 
     @logger.catch
-    def markup_cab_in_trailer() -> object:
+    def markup_cab_in_trailer(self):
         """
         Определение номера шкафа для прицепного вагона.
         """
         fuses = types.InlineKeyboardMarkup()
-        btn3 = types.InlineKeyboardButton(
+        btn1 = types.InlineKeyboardButton(
             'шкаф №3', callback_data='trailer_cab_3')
-        btn4 = types.InlineKeyboardButton(
+        btn2 = types.InlineKeyboardButton(
             'шкаф №4', callback_data='trailer_cab_4')
-        fuses.add(btn3, btn4)
+        fuses.add(btn1, btn2)
         return fuses
