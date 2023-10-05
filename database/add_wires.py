@@ -290,7 +290,7 @@ with Session(engine) as session:
         description='Киловольтметр'
     )
 
-    # wires = ('wire' + str(i) for i in range(1, 72))
+    # wires = ['wire' + str(i) for i in range(1, 72)]
     # session.add_all(wires)
     # session.commit()
 
