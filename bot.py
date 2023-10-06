@@ -7,12 +7,10 @@ import os
 
 import telebot
 from dotenv import load_dotenv
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from telebot import apihelper
 
 from database.models import (HeadCarDevices, MotorCarDevices,
-                             TrailerCarDevices, Wires, engine)
+                             TrailerCarDevices, DataAccess)
 from keyboard_mixin import KeyboardMixin
 from logger import logger
 
@@ -25,10 +23,12 @@ class Bot:
     def __init__(self):
         load_dotenv()
         self.bot = self.do_auth()
-        # Словарь для хранения временных данных от пользователя
+        # Словарь для хранения временных данных от пользователя:
+        # тип вагона, номер шкафа.
         self.temp_data = {}
         # kb- keyboard
         self.kb = KeyboardMixin()
+        self.dataAccess = DataAccess()
 
     @logger.catch
     def do_auth(self) -> None | telebot.TeleBot:
@@ -227,12 +227,10 @@ class Bot:
         отпровляет данные с БД (описание провода).
         """
         wire_number = message.text
-        session = Session(engine)
-        staitment = select(Wires).where(Wires.name.in_([wire_number]))
-        try:
-            wire = session.scalar(staitment).description
+        wire = self.dataAccess.get_data_wires(wire_number)
+        if wire is not None:
             self.bot.send_message(message.chat.id, wire)
-        except AttributeError:
+        else:
             self.bot.send_message(message.chat.id,
                                   'Такого провода нет.\n'
                                   'В базе есть провода с 1-71.')
@@ -244,23 +242,20 @@ class Bot:
         связывается с БД (таблички данного типа вагона),
         отпровляет данные с БД (описание конкретного аппарата).
         """
-        user = self.temp_data[message.chat.id]
-        deviсes = message.text.upper()
-        session = Session(engine)
-        staitment = select(
-            user).where(user.name.in_([deviсes]))
-        try:
-            deviсes = session.scalar(staitment)
+        type_car = self.temp_data[message.chat.id]
+        deviсe_name = message.text.upper()
+        dev_des, dev_loc = self.dataAccess.get_data_devices(type_car, deviсe_name)
+        if dev_des is not None:
             self.bot.send_message(
-                message.chat.id,
-                f'Находится: {deviсes.location}\n{deviсes.description}')
-        except AttributeError:
+                    message.chat.id,
+                    f'Находится: {dev_loc}\n{dev_des}')
+        else:
             self.bot.send_message(
-                message.chat.id,
-                'Такого аппарата в данном вагоне нет.\n'
-                'Или проверьте правильность написания.\n'
-                'Пишите название через тире.\n'
-                'Пример: Тр-7, ПР-10, КЛП-О, АВУ')
+                    message.chat.id,
+                    'Такого аппарата в данном вагоне нет.\n'
+                    'Или проверьте правильность написания.\n'
+                    'Пишите название через тире.\n'
+                    'Пример: Тр-7, ПР-10, КЛП-О, АВУ')
 
     @logger.catch
     def fuses_in_cabinets(self, message) -> None:
@@ -269,19 +264,11 @@ class Bot:
         связывается с БД (табличка данного типа вагона),
         отпровляет данные с БД (все предохранители в шкафу).
         """
-        tablet = self.temp_data[message.chat.id][0]
+        type_car = self.temp_data[message.chat.id][0]
         cabinet = self.temp_data[message.chat.id][1]
-        session = Session(engine)
-        staitment = select(
-            tablet).where(
-                tablet.location.in_(
-                    [cabinet])).filter(
-                        tablet.name.like('ПР-%'))
+        all_fuses = self.dataAccess.get_data_fuses(type_car, cabinet)
         self.bot.send_message(message.chat.id, '----------------------------')
-        for fuses in session.scalars(staitment):
-            result = []
-            result.append(f'{fuses.name}: {fuses.description.lower()}\n')
-            self.bot.send_message(message.chat.id, result)
+        self.bot.send_message(message.chat.id, all_fuses)
 
     @logger.catch
     def get_calldata_fuses(
@@ -329,6 +316,7 @@ class Bot:
         """
         Запуск бота.
         """
+        self.start()
         while True:
             try:
                 self.bot.infinity_polling()
