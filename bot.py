@@ -28,6 +28,7 @@ class Bot:
         self.temp_data = {}
         # kb- keyboard
         self.kb = KeyboardMixin()
+        # Получение данных из базы
         self.dataAccess = DataAccess()
 
     @logger.catch
