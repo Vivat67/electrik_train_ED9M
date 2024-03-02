@@ -18,6 +18,7 @@ from logger import logger
 class Bot:
     """
     Основное взаимодействие с ботом.
+    Инциализация бота.
     """
 
     def __init__(self):
